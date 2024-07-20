@@ -13,8 +13,6 @@
     "@react-three/drei": "^9.108.4",
     "@react-three/fiber": "^8.16.8",
     "@reduxjs/toolkit": "^2.2.6",
-    "@react-three/drei": "^9.108.4",
-    "@react-three/fiber": "^8.16.8",
     "axios": "^1.7.2",
     "ml5": "^1.0.1",
     "patch-package": "^8.0.0",
