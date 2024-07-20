@@ -25,6 +25,8 @@ const Leave = require("./models/leave.models");
 const Warden = require("./models/warden.models");
 const Teacher = require("./models/teacher.models");
 const Entry = require("./models/entry.models");
+const Patient = require("./models/patient.models");
+
 const moment = require("moment");
 const nodemailer = require("nodemailer");
 
@@ -55,7 +57,6 @@ mongoose
   });
 
 //Twilio
-const Patient = require("./models/patient.models");
 
 const accountSid = process.env.TWILIO_ACCOUNT_SID;
 const authToken = process.env.TWILIO_AUTH_TOKEN;
@@ -724,52 +725,75 @@ app.post("/set-medication", async (req, res) => {
 
 // Endpoint to share patient info from warden to teacher
 app.post("/share-patient-info", verifyJWT, async (req, res) => {
-  const {
-    teacherEmail,
-    patientEmail,
-    patientFullName,
-    dateOfAdmission,
-    dateOfDischarge,
-    reason,
-  } = req.body;
+  const { patientEmail, dateOfAdmission, dateOfDischarge, reason } = req.body;
 
+  console.log(req.body);
+  // console.log(req.user);
   try {
-    console.log(req.user);
-
-    const teacher = await Teacher.findOne({ email: teacherEmail });
-    if (!teacher) {
-      return res.status(404).json({ message: "Teacher not found" });
-    }
-
     const patient = await Student.findOne({ email: patientEmail });
     if (!patient) {
       return res.status(404).json({ message: "Patient not found" });
     }
-
-    const message = `Patient Info:
-    Name: ${patientFullName}
-    Email: ${patientEmail}
-    Date of Admission: ${dateOfAdmission}
-    Date of Discharge: ${dateOfDischarge || "N/A"}
-    Reason: ${reason}`;
-
-    const newPatient = await Patient.create({
-      fullName: patientFullName,
-      email: patientEmail,
-      dateOfAdmission,
-      dateOfDischarge,
+    const studentId = patient._id; // Get the logged-in user's ID
+    const savedPatient = await Patient.create({
+      student: studentId,
+      dateOfAdmission: new Date(dateOfAdmission),
+      dateOfDischarge: new Date(dateOfDischarge),
       reason,
     });
 
-    res.status(200).json({
-      message: "Patient info shared successfully",
-      patientInfo: message,
+    // Save the Patient document
+    // const savedPatient = await newPatient.save();
+
+    // Add the Patient ObjectId to the Student's Patients array
+    await Student.findByIdAndUpdate(studentId, {
+      $push: { medHist: savedPatient._id },
     });
+
+    res.status(200).send("Patient saved successfully.");
+    console.log(patient);
+    // const message = `Patient Info:
+    // Name: ${patientFullName}
+    // Email: ${patientEmail}
+    // Date of Admission: ${dateOfAdmission}
+    // Date of Discharge: ${dateOfDischarge || "N/A"}
+    // Reason: ${reason}`;
+
+    // const newPatient = await Patient.create({
+    //   student: patient._id,
+    //   dateOfAdmission: new Date(dateOfAdmission),
+    //   dateOfDischarge: new Date(dateOfDischarge),
+    //   reason,
+    // });
+
+    // await newPatient.save();
+
+    // res.status(200).json({
+    //   message: "Patient info shared successfully",
+    //   patientInfo: message,
+    // });
   } catch (error) {
     res.status(500).json({ message: "Failed to share patient info", error });
   }
 });
+app.get("/get-patients", async (req, res) => {
+  const sevenDaysAgo = new Date();
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
+  try {
+    const patients = await Patient.find({
+      dateOfAdmission: {
+        $gte: sevenDaysAgo, // Greater than or equal to 7 days ago
+        $lte: new Date(), // Less than or equal to now
+      },
+    })
+      .populate("student")
+      .exec();
+    return res.status(200).json(patients);
+  } catch (error) {
+    return res.status(500).send("Couldn't fetch patient list", error);
+  }
+});
 const mockStudents = {
   "55.juhideore@gmail.com": {
     email: "55.juhideore@gmail.com",
