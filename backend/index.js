@@ -29,6 +29,7 @@ const Patient = require("./models/patient.models");
 
 const moment = require("moment");
 const nodemailer = require("nodemailer");
+const Security = require("./models/security.models");
 
 app.use(cookieParser()); // for CRUD operations on cookies
 // app.use("/files", express.static(path.join(__dirname, "public")));
@@ -228,6 +229,8 @@ app.post("/logout", verifyJWT, async (req, res) => {
       message: "User logged out successfully",
     });
 });
+
+// LEAVE APPLICATION
 app.post("/apply-leave", verifyJWT, upload.single("file"), async (req, res) => {
   const { reason, startDateStr, endDateStr } = req.body;
 
@@ -300,6 +303,7 @@ app.get("/fetch-leaves", verifyJWT, async (req, res) => {
   }
 });
 
+// STEPS TRACKER
 app.get("/getURLTing", (req, res) => {
   const oauth2Client = new google.auth.OAuth2(
     process.env.CLIENT_ID,
@@ -422,6 +426,8 @@ app.get("/steps", async (req, res) => {
     }
   }
 });
+
+//ISOLATION ALERT
 app.post("/send-alerts", async (req, res) => {
   const { disease, phone } = req.body;
 
@@ -454,7 +460,7 @@ app.post("/send-alerts", async (req, res) => {
       .json({ message: "Failed to send alerts", error: error.message });
   }
 });
-
+// SECURITY CHECKIN
 // Function to export entries to Excel
 async function exportEntriesToExcel() {
   try {
@@ -516,12 +522,8 @@ app.get("/download-entries", async (req, res) => {
     }
   });
 });
-
 // Schedule the task to run every 7 days
 // cron.schedule('0 0 * * 0', exportEntriesToExcel); // Runs every Sunday at midnight
-
-// Run the function immediately
-// exportEntriesToExcel();
 
 app.post("/hostel-entry", verifyJWT, async (req, res) => {
   const { studentEmail } = req.body;
@@ -604,36 +606,6 @@ function getDueMedications(student) {
   });
   return dueMedications;
 }
-
-// Iterate over each dosage time
-// dosageArray.forEach((doseCount, index) => {
-//   if (doseCount > 0) {
-//     // Validate time format
-//     const time = med.times[index];
-//     if (!time || !time.includes(":")) {
-//       console.error("Invalid time format in medication:", med);
-//       return;
-//     }
-
-//     const [hour, minute] = time.split(":").map(Number);
-//     const doseTime = moment().hour(hour).minute(minute).second(0);
-
-//     // Check if current time matches the dose time
-//     if (currentTime.isSame(doseTime, "minute")) {
-//       if (!dueMedications[med.medicationName]) {
-//         dueMedications[med.medicationName] = [];
-//       }
-//       dueMedications[med.medicationName].push({
-//         time: doseTime.format("HH:mm"),
-//         dose: doseCount,
-//       });
-//     }
-// }
-// });
-// }
-// });
-
-// }
 
 async function sendNotification(student, dueMedications) {
   let transporter = nodemailer.createTransport({
@@ -723,7 +695,7 @@ app.post("/set-medication", async (req, res) => {
   }
 });
 
-// Endpoint to share patient info from warden to teacher
+// PATIENT INFO SHARING
 app.post("/share-patient-info", verifyJWT, async (req, res) => {
   const { patientEmail, dateOfAdmission, dateOfDischarge, reason } = req.body;
 
@@ -794,6 +766,50 @@ app.get("/get-patients", async (req, res) => {
     return res.status(500).send("Couldn't fetch patient list", error);
   }
 });
+
+// ROOM OCCUPANCY
+app.post("/update-room-occupancy", async (req, res) => {
+  const { count } = req.body;
+  try {
+    const system = await Security.findByIdAndUpdate(
+      "669ca648a3cb4c8fc8587cf1",
+      {
+        $set: { roomCount: count },
+      },
+      {
+        new: true,
+      }
+    );
+    if (!system) {
+      return res
+        .status(404)
+        .json({ message: "No such security system was found" });
+    }
+
+    return res
+      .status(200)
+      .json({ message: "Updated room count successfully!" });
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ message: "Error ehile updating room count ", error });
+  }
+});
+app.get("/get-occupancy", async (req, res) => {
+  try {
+    const rooms = await Security.find();
+    if (!rooms) {
+      return res.status(200).json({ message: "No rooms were found" });
+    }
+
+    return res.status(200).json(rooms);
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ message: "Error ehile fetching room count ", error });
+  }
+});
+
 const mockStudents = {
   "55.juhideore@gmail.com": {
     email: "55.juhideore@gmail.com",
