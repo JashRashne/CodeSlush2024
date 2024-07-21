@@ -5,6 +5,7 @@ import { updatePersonCount } from "../Store/PersonSlice";
 import * as ml5 from "ml5";
 import Webcam from "react-webcam";
 import Navbar from "./Navbar";
+import axios from "axios";
 
 const dimensions = {
   width: 800,
@@ -22,7 +23,14 @@ const CamSurveillance = () => {
 
   const updateCountAPI = async (e) => {
     try {
-      console.log(newCount, "HI");
+      const request = await axios.post(
+        "http://localhost:8000/update-room-occupancy",
+        {
+          count: newCount,
+        }
+      );
+      const response = request.data;
+      console.log(response);
     } catch (err) {
       console.error(err.message);
     }
@@ -93,7 +101,7 @@ const CamSurveillance = () => {
   return (
     <>
       <div className="h-[100vh]">
-        <Navbar />
+        {/* <Navbar /> */}
         <div className=" p-5 h-[90%] flex justify-evenly">
           <div className="max-w-[68%] max-h-[100%] relative flex items-center w-[100%]">
             <Webcam ref={webcamRef} className="w-[100%] h-[100%] relative" />

@@ -12,6 +12,7 @@ export function FemaleAvatar(props) {
   const { scene } = useGLTF("avatarModels/HostelWoman.glb");
   const clone = React.useMemo(() => SkeletonUtils.clone(scene), [scene]);
   const { nodes, materials } = useGraph(clone);
+  
   return (
     <group {...props} dispose={null}>
       <primitive object={nodes.Hips} />

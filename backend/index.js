@@ -194,6 +194,9 @@ app.post("/login", async (req, res) => {
     httpOnly: true,
   };
 
+  let tempRes = await axios.get("http://localhost:8000/getURLTing");
+  console.log(tempRes.data.url, "BAKCHODI ");
+
   return res
     .status(200)
     .cookie("accessToken", accessToken, options)
@@ -203,6 +206,7 @@ app.post("/login", async (req, res) => {
       accessToken,
       refreshToken,
       message: "User logged in successfully",
+      url: tempRes.data.url,
     });
 });
 app.post("/logout", verifyJWT, async (req, res) => {
@@ -308,7 +312,7 @@ app.get("/getURLTing", (req, res) => {
   const oauth2Client = new google.auth.OAuth2(
     process.env.CLIENT_ID,
     process.env.CLIENT_SECRET,
-    "http://localhost:8000/steps"
+    "http://localhost:5173/oauth/callback"
   );
 
   const scopes = [
@@ -346,9 +350,7 @@ let heartRateArray = [];
 let fitData;
 
 app.get("/steps", async (req, res) => {
-  const queryURL = new urlParse(req.url);
-  const queryString = await import("query-string");
-  const code = queryString.default.parse(queryURL.query).code;
+  const { code } = req.query; // Read code from query parameters
   console.log("Authorization code: ", code);
 
   const oauth2Client = new google.auth.OAuth2(
@@ -359,7 +361,17 @@ app.get("/steps", async (req, res) => {
 
   try {
     const { tokens } = await oauth2Client.getToken(code);
+    console.log(tokens);
     oauth2Client.setCredentials(tokens);
+
+    // Define time range
+    const now = new Date();
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(now.getDate() - 7);
+
+    // Convert time range to milliseconds
+    const sevenDaysAgoMillis = sevenDaysAgo.getTime();
+    const nowMillis = now.getTime();
 
     const result = await axios.post(
       "https://www.googleapis.com/fitness/v1/users/me/dataset:aggregate",
@@ -383,7 +395,7 @@ app.get("/steps", async (req, res) => {
         ],
         bucketByTime: { durationMillis: 86400000 },
         startTimeMillis: sevenDaysAgoMillis,
-        endTimeMillis: now.getTime(),
+        endTimeMillis: nowMillis,
       },
       {
         headers: {
@@ -393,8 +405,11 @@ app.get("/steps", async (req, res) => {
       }
     );
 
-    summaryArray = result.data.bucket;
-    // res.send(summaryArray)
+    const summaryArray = result.data.bucket;
+    const stepsArrayNew = [];
+    const workoutArray = [];
+    const heartRateArray = [];
+
     for (const dataSet of summaryArray) {
       for (const points of dataSet.dataset) {
         for (const values of points.point) {
@@ -408,12 +423,14 @@ app.get("/steps", async (req, res) => {
         }
       }
     }
-    fitData = {
+
+    const fitData = {
       steps: stepsArrayNew,
       workout: workoutArray,
       heartRate: heartRateArray,
     };
-    res.send(fitData);
+
+    return res.status(200).json(fitData);
   } catch (error) {
     console.error(
       "Error during API request: ",
@@ -586,7 +603,7 @@ function getDueMedications(student) {
         console.error("Invalid or insufficient times data in medication:", med);
         return;
       }
-      console.log(dosageArray);
+      // console.log(dosageArray);
       dosageArray.map((doseCount, index) => {
         if (doseCount) {
           const time = med.times[index];
@@ -644,9 +661,9 @@ cron.schedule("* * * * *", async () => {
 
     students.forEach((student) => {
       const dueMedications = getDueMedications(student);
-      console.log(dueMedications);
+      // console.log(dueMedications);
       dueMedications.map((medicine) => {
-        console.log(medicine.medName, "juhi", medicine.time);
+        // console.log(medicine.medName, "juhi", medicine.time);
       });
       if (Array.isArray(dueMedications) && dueMedications.length > 0) {
         sendNotification(student, dueMedications);
@@ -673,7 +690,6 @@ app.post("/set-medication", async (req, res) => {
     days,
     times,
   };
-  console.log(medication);
   try {
     const student = await Student.findByIdAndUpdate(
       // req.user._id,
@@ -695,8 +711,44 @@ app.post("/set-medication", async (req, res) => {
   }
 });
 
+app.get("/due-medications", async (req, res) => {
+  try {
+    const student = await Student.findById(
+      // req.user._id
+      "669bad56801255e31e6a9d0b"
+    );
+    if (!student) {
+      return res.status(404).json({ message: "Student not found" });
+    }
+
+    const currentDayMedications = student.medication
+      ?.filter((med) => {
+        const startDate = moment(med.startDate);
+        const endDate = moment(med.startDate).add(med.days, "days");
+        return moment().isBetween(startDate, endDate, "day", "[)");
+      })
+      .map((med) => ({
+        medName: med.medName,
+        dosage: med.dosage,
+      }));
+
+    if (currentDayMedications.length === 0) {
+      return res
+        .status(200)
+        .json({ message: "No medications are valid for today" });
+    }
+
+    return res.status(200).json(currentDayMedications);
+  } catch (error) {
+    console.error("Error fetching medications:", error);
+    res
+      .status(500)
+      .json({ message: "Error while fetching medications", error });
+  }
+});
+
 // PATIENT INFO SHARING
-app.post("/share-patient-info", verifyJWT, async (req, res) => {
+app.post("/share-patient-info", async (req, res) => {
   const { patientEmail, dateOfAdmission, dateOfDischarge, reason } = req.body;
 
   console.log(req.body);
@@ -767,6 +819,27 @@ app.get("/get-patients", async (req, res) => {
   }
 });
 
+// MEDICAL HISTORY
+app.get("/get-medHist", async (req, res) => {
+  try {
+    const student = await Student.findById("669bad56801255e31e6a9d0b")
+      .populate("medHist")
+      .exec();
+    // req.user._id)
+
+    if (!student) {
+      return res.status(404).json({ message: "Student not found" });
+    }
+
+    const medHist = student.medHist;
+    return res.status(200).json(medHist);
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ message: "Error fetching medical history ", error });
+  }
+});
+
 // ROOM OCCUPANCY
 app.post("/update-room-occupancy", async (req, res) => {
   const { count } = req.body;
@@ -792,9 +865,10 @@ app.post("/update-room-occupancy", async (req, res) => {
   } catch (error) {
     return res
       .status(500)
-      .json({ message: "Error ehile updating room count ", error });
+      .json({ message: "Error while updating room count ", error });
   }
 });
+
 app.get("/get-occupancy", async (req, res) => {
   try {
     const rooms = await Security.find();
@@ -863,6 +937,54 @@ app.post("/send-location-alert", async (req, res) => {
     res
       .status(500)
       .json({ message: "Failed to send location alert", error: error.message });
+  }
+});
+
+async function sendNotification2(student) {
+  let transporter = nodemailer.createTransport({
+    service: "gmail",
+    host: "smtp.gmail.com",
+    port: 587,
+    secure: false,
+    auth: {
+      user: process.env.EMAIL,
+      pass: process.env.EMAIL_PASSWORD,
+    },
+  });
+
+  const mailOptions = {
+    from: process.env.EMAIL,
+    to: student.email,
+    subject: "High Stress Level Alert",
+    text: `Dear Warden,\n\nThis is to notify you that ${student.name} is experiencing a high level of stress.\n\nPlease take the necessary actions to support the student.\n\nBest regards,\nMental Wellbeing Team`,
+  };
+
+  try {
+    let info = await transporter.sendMail(mailOptions);
+    console.log("Message sent: %s", info.messageId);
+  } catch (error) {
+    console.error("Error sending email:", error);
+  }
+}
+
+app.post("/help-form", async (req, res) => {
+  const responses = req.body;
+
+  if (responses.stressLevel === "high") {
+    const student = {
+      name: responses.name,
+      email: "warden-email@example.com",
+    };
+
+    try {
+      await sendNotification2(student);
+      res.status(200).send("Form submitted and email sent.");
+    } catch (error) {
+      console.error("Error sending email:", error);
+      res.status(500).send("Form submitted but failed to send email.");
+    }
+  } else {
+    res.status(200).send("Form submitted without high stress alert.");
   }
 });
 
