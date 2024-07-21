@@ -1,23 +1,25 @@
-import React, { useState } from 'react';
-import Consultation from './Consultation';
+import React, { useState } from "react";
+import Consultation from "./Consultation";
+import axios from "axios";
+import close from "../assets/close.png";
 
-const HelpAsk = () => {
+const HelpAsk = ({ setIsStressSOSOpen }) => {
   const [responses, setResponses] = useState({
-    feeling: '',
-    stressLevel: '',
+    feeling: "",
+    stressLevel: "",
     support: {
       friends: false,
       family: false,
       others: false,
     },
-    hobbies: '',
+    hobbies: "",
   });
 
   const [showConsultation, setShowConsultation] = useState(false);
 
   const handleChange = (event) => {
     const { name, value, type, checked } = event.target;
-    if (type === 'checkbox') {
+    if (type === "checkbox") {
       setResponses((prevResponses) => ({
         ...prevResponses,
         support: {
@@ -33,10 +35,19 @@ const HelpAsk = () => {
     }
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    console.log('User responses:', responses);
-    setShowConsultation(true);
+    console.log("User responses:", responses);
+
+    await axios
+      .post("http://localhost:8000/help-form", responses)
+      .then((response) => {
+        console.log(response.data);
+        setShowConsultation(true);
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+      });
   };
 
   if (showConsultation) {
@@ -44,103 +55,92 @@ const HelpAsk = () => {
   }
 
   return (
-    <div className="max-w-3xl mx-auto p-6 bg-white rounded-lg shadow-md">
-      <h2 className="text-2xl font-bold mb-6">Mental Wellbeing Check</h2>
+    <div className="w-[98%] h-[98%] p-6 bg-white rounded-xl shadow-lg border border-[#016A70]">
+      <h2 className="text-4xl font-bold mb-6 text-[#016A70] text-center">
+        Mental Wellbeing Check
+      </h2>
+      <div
+        onClick={() => {
+          setIsStressSOSOpen(false);
+        }}
+        className="absolute top-10 right-10 text-gray-500 hover:text-gray-700 text-3xl w-7 h-7 cursor-pointer flex items-center justify-center"
+      >
+        <img src={close} alt="close" />
+      </div>{" "}
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-lg font-medium mb-2">
+          <label className="block text-lg font-semibold text-[#016A70] mb-2">
             How are you feeling today?
-            <textarea
-              name="feeling"
-              value={responses.feeling}
-              onChange={handleChange}
-              rows="4"
-              className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-            />
           </label>
+          <textarea
+            name="feeling"
+            value={responses.feeling}
+            onChange={handleChange}
+            rows="3"
+            className="block w-full p-3 border border-[#016A70] rounded-lg shadow-sm focus:ring-[#D2DE32] focus:border-[#D2DE32] bg-white transition-all duration-300 resize-none"
+          />
         </div>
         <div>
-          <span className="block text-lg font-medium mb-2">Are you experiencing any stress or anxiety?</span>
-          <div className="flex items-center mb-2">
-            <input
-              type="radio"
-              id="stressLow"
-              name="stressLevel"
-              value="low"
-              checked={responses.stressLevel === 'low'}
-              onChange={handleChange}
-              className="mr-2"
-            />
-            <label htmlFor="stressLow" className="mr-4">Low</label>
-            <input
-              type="radio"
-              id="stressMedium"
-              name="stressLevel"
-              value="medium"
-              checked={responses.stressLevel === 'medium'}
-              onChange={handleChange}
-              className="mr-2"
-            />
-            <label htmlFor="stressMedium" className="mr-4">Medium</label>
-            <input
-              type="radio"
-              id="stressHigh"
-              name="stressLevel"
-              value="high"
-              checked={responses.stressLevel === 'high'}
-              onChange={handleChange}
-              className="mr-2"
-            />
-            <label htmlFor="stressHigh">High</label>
+          <span className="block text-lg font-semibold text-[#016A70] mb-2">
+            Are you experiencing any stress or anxiety?
+          </span>
+          <div className="flex space-x-4">
+            {["low", "medium", "high"].map((level) => (
+              <label key={level} className="flex items-center text-[#016A70]">
+                <input
+                  type="radio"
+                  id={`stress${level.charAt(0).toUpperCase() + level.slice(1)}`}
+                  name="stressLevel"
+                  value={level}
+                  checked={responses.stressLevel === level}
+                  onChange={handleChange}
+                  className="mr-2"
+                />
+                {level.charAt(0).toUpperCase() + level.slice(1)}
+              </label>
+            ))}
           </div>
         </div>
         <div>
-          <span className="block text-lg font-medium mb-2">Do you feel you have enough support from:</span>
-          <div className="flex items-center mb-2">
-            <input
-              type="checkbox"
-              id="supportFriends"
-              name="friends"
-              checked={responses.support.friends}
-              onChange={handleChange}
-              className="mr-2"
-            />
-            <label htmlFor="supportFriends" className="mr-4">Friends</label>
-            <input
-              type="checkbox"
-              id="supportFamily"
-              name="family"
-              checked={responses.support.family}
-              onChange={handleChange}
-              className="mr-2"
-            />
-            <label htmlFor="supportFamily" className="mr-4">Family</label>
-            <input
-              type="checkbox"
-              id="supportOthers"
-              name="others"
-              checked={responses.support.others}
-              onChange={handleChange}
-              className="mr-2"
-            />
-            <label htmlFor="supportOthers">Others</label>
+          <span className="block text-lg font-semibold text-[#016A70] mb-2">
+            Do you feel you have enough support from:
+          </span>
+          <div className="flex flex-wrap space-x-4">
+            {["friends", "family", "others"].map((supportType) => (
+              <label
+                key={supportType}
+                className="flex items-center text-[#016A70]"
+              >
+                <input
+                  type="checkbox"
+                  id={`support${
+                    supportType.charAt(0).toUpperCase() + supportType.slice(1)
+                  }`}
+                  name={supportType}
+                  checked={responses.support[supportType]}
+                  onChange={handleChange}
+                  className="mr-2"
+                />
+                {supportType.charAt(0).toUpperCase() + supportType.slice(1)}
+              </label>
+            ))}
           </div>
         </div>
         <div>
-          <label className="block text-lg font-medium mb-2">
+          <label className="block text-lg font-semibold text-[#016A70] mb-2">
             What activities or hobbies help you relax and unwind?
-            <textarea
-              name="hobbies"
-              value={responses.hobbies}
-              onChange={handleChange}
-              rows="4"
-              className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-            />
           </label>
+          <textarea
+            name="hobbies"
+            value={responses.hobbies}
+            onChange={handleChange}
+            rows="3"
+            className="block w-full p-3 border border-[#016A70] rounded-lg shadow-sm focus:ring-[#D2DE32] focus:border-[#D2DE32] bg-white transition-all duration-300 resize-none"
+          />
         </div>
         <button
           type="submit"
-          className="w-full py-2 px-4 bg-blue-500 text-white font-semibold rounded-md shadow-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75"
+          className="w-full py-2 px-4 bg-[#016A70] text-white font-bold rounded-lg shadow-md hover:bg-[#D2DE32] focus:outline-none focus:ring-2 focus:ring-[#016A70] focus:ring-opacity-75 transition duration-300"
         >
           Submit
         </button>
