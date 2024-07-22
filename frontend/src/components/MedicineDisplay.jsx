@@ -24,7 +24,7 @@ const MedicineDisplay = () => {
       {medications.map((med, index) => (
         <div
           key={index}
-          className="w-[90%] h-[50%] bg-amber-600 rounded-xl flex justify-between items-center px-2 text-white text-[01rem] font-medium "
+          className="w-[95%] h-[50%] bg-white rounded-xl flex justify-between items-center px-2 text-[01rem] font-medium "
         >
           <h1>{med.medName}</h1>
           <p>{med.dosage}</p>

@@ -1,7 +1,40 @@
-import React from "react";
+import React, { useState } from "react";
+import axios from "axios";
 import logo from "../assets/logo.png";
 
 const MainLanding = () => {
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+    role: "student",
+  });
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      [name]: value,
+    }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      const response = await axios.post(
+        "http://localhost:8000/login",
+        formData
+      );
+      if (response.status === 200 || response.status === 201) {
+        console.log(response.data); // Log the response data for debugging
+        window.location.replace(response.data.url);
+        console.log("AFTER REPLACE");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+
   return (
     <div className="flex flex-col items-center h-screen bg-stone-100">
       <header className="w-full flex justify-start p-2 absolute">
@@ -20,7 +53,7 @@ const MainLanding = () => {
             <h2 className="text-3xl font-semibold mb-5 text-stone-950">
               Sign In
             </h2>
-            <form className="w-full">
+            <form className="w-full" onSubmit={handleSubmit}>
               <div className="mb-5 w-full">
                 <label htmlFor="email" className="block mb-2 text-stone-950">
                   Email
@@ -29,6 +62,8 @@ const MainLanding = () => {
                   type="email"
                   id="email"
                   name="email"
+                  value={formData.email}
+                  onChange={handleChange}
                   className="w-full p-2 border border-gray-300 rounded"
                   required
                 />
@@ -41,6 +76,8 @@ const MainLanding = () => {
                   type="password"
                   id="password"
                   name="password"
+                  value={formData.password}
+                  onChange={handleChange}
                   className="w-full p-2 border border-gray-300 rounded"
                   required
                 />
@@ -52,6 +89,8 @@ const MainLanding = () => {
                 <select
                   id="role"
                   name="role"
+                  value={formData.role}
+                  onChange={handleChange}
                   className="w-full p-2 border border-gray-300 rounded"
                   required
                 >

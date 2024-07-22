@@ -21,7 +21,7 @@ const MedHistory = () => {
       {medHist.map((hist, index) => (
         <div
           key={index}
-          className="w-[90%] text-white text-lg  h-[2.5rem] rounded-xl flex justify-between px-2 items-center "
+          className="w-[90%] text-lg  h-[2.5rem] rounded-xl flex justify-between px-2 items-center "
         >
           <div>{hist.reason}</div>
           <div>

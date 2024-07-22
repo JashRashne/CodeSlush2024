@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { updatePersonCount } from "../Store/PersonSlice";
 import * as ml5 from "ml5";
+import close from "../assets/close.png";
 import Webcam from "react-webcam";
 import Navbar from "./Navbar";
 import axios from "axios";
@@ -12,7 +13,7 @@ const dimensions = {
   height: 500,
 };
 
-const CamSurveillance = () => {
+const CamSurveillance = ({ setSurvCam }) => {
   const [newCount, setNewCount] = useState(0);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -100,24 +101,30 @@ const CamSurveillance = () => {
 
   return (
     <>
-      <div className="h-[100vh]">
-        {/* <Navbar /> */}
-        <div className=" p-5 h-[90%] flex justify-evenly">
-          <div className="max-w-[68%] max-h-[100%] relative flex items-center w-[100%]">
-            <Webcam ref={webcamRef} className="w-[100%] h-[100%] relative" />
-            <canvas
-              ref={canvasRef}
-              className="w-[100%] h-[100%] absolute top-0 left-0 z-[100]"
-            />
-          </div>
-          <div className=" w-[25%] flex flex-col gap-10 items-center justify-center">
-            <h1 className="noto-sans-dashFont text-center text-[44px]">
-              Surveillance is ON
-            </h1>
-            <p className="noto-sans-dashFont text-center text-[24px]">
-              Number of Students : {newCount}
-            </p>
-          </div>
+      <div className=" h-[90%] flex justify-evenly">
+        {" "}
+        <div
+          onClick={() => {
+            setSurvCam(false);
+          }}
+          className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-3xl w-7 h-7 cursor-pointer flex items-center justify-center"
+        >
+          <img src={close} alt="close" />
+        </div>
+        <div className="max-w-[68%] max-h-[100%] relative flex items-center w-[100%]">
+          <Webcam ref={webcamRef} className="w-[100%] h-[100%] relative" />
+          <canvas
+            ref={canvasRef}
+            className="w-[100%] h-[100%] absolute top-0 left-0 z-[100]"
+          />
+        </div>
+        <div className=" w-[25%] flex flex-col gap-10 items-center justify-center">
+          <h1 className="noto-sans-dashFont text-center text-[44px]">
+            Surveillance is ON
+          </h1>
+          <p className="noto-sans-dashFont text-center text-[24px]">
+            Number of Students : {newCount}
+          </p>
         </div>
       </div>
     </>
