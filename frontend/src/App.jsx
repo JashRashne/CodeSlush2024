@@ -39,9 +39,9 @@ function App() {
           {/* <MedicalHistory /> */}
           {/* <CamSurveillance /> */}
           {/* <PatientInfo /> */}
-          <SecurityCheckIn />
-          {/* {/* <WardenDashboard/>
-          <StudentDashboard/> */}
+          {/* <SecurityCheckIn /> */}
+          {/* <WardenDashboard/> */}
+          <StudentDashboard/>
           {/* <HelpAsk /> */}
         </Layout>
       </Router>
