@@ -4,9 +4,25 @@ import logo from "../assets/logo.png";
 import setting from "../assets/setting.png";
 import logout from "../assets/logout.png";
 import { motion } from "framer-motion";
+import axios from "axios";
 
 const Navbar = () => {
   const [isSettingOpen, setIsSettingOpen] = useState(false);
+  async function logoutUser() {
+    try {
+      const response = await axios.post(
+        "http://localhost:8000/logout",
+        {}, // Assuming no body is required
+        { withCredentials: true }
+      ); // Include credentials);
+
+      console.log(response.data);
+      localStorage.removeItem("user");
+      window.location.reload();
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
   return (
     <div className="h-full w-full flex items-center justify-between px-5">
@@ -40,6 +56,7 @@ const Navbar = () => {
                 src={logout}
                 alt="logout"
                 className="w-[1.2rem] cursor-pointer"
+                onClick={() => logoutUser()}
               />
             </motion.div>
           </>
