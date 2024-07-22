@@ -36,7 +36,7 @@ app.use(cookieParser()); // for CRUD operations on cookies
 
 app.use(
   cors({
-    origin: process.env.CORS_ORIGIN,
+    origin: "http://localhost:5173",
     credentials: true,
   })
 );
@@ -97,11 +97,22 @@ app.get("/", async (req, res) => {
   const { email } = req.query;
   if (!email) return res.status(400).send("Email is missing.");
   try {
-    const student = await User.findOne({ email });
+    const student = await Student.findOne({ email });
     if (!student) return res.status(400).send("User does not exist.");
-    res.status(200).send(student.email);
+    return res.status(200).send(student);
   } catch (err) {
-    res.status(500).send(err.message);
+    return res.status(500).send(err.message);
+  }
+});
+app.get("/student-emails", async (req, res) => {
+  try {
+    const students = await Student.find();
+    if (!students) return res.status(400).send("No students found.");
+    let studentEmails = [];
+    students.map((student) => studentEmails.push(student?.email));
+    return res.status(200).json(studentEmails);
+  } catch (err) {
+    return res.status(500).json("Error while fetching emails", err.message);
   }
 });
 app.post("/register", async (req, res) => {
@@ -185,7 +196,7 @@ app.post("/login", async (req, res) => {
     user._id,
     role
   );
-
+  console.log(accessToken, "ACCESS TOKEN");
   const loggedInUser = await UserModel.findById(user._id).select(
     "-password -refreshToken"
   );
@@ -212,30 +223,35 @@ app.post("/login", async (req, res) => {
 app.post("/logout", verifyJWT, async (req, res) => {
   // console.log(req.user, "   LOGOUT");
   // const { role } = req.body;
-  const UserModel = getUserModel(req.user.role);
-  await UserModel.findByIdAndUpdate(
-    req.user._id,
-    {
-      $: { refreshToken: undefined },
-    },
-    { new: true }
-  );
+  try {
+    const UserModel = getUserModel(req.user.role);
+    const user = await UserModel.findByIdAndUpdate(
+      req.user._id,
+      {
+        $set: { refreshToken: undefined },
+      },
+      { new: true }
+    );
 
-  const options = {
-    httpOnly: true,
-  };
+    console.log(user);
+    const options = {
+      httpOnly: true,
+    };
 
-  return res
-    .status(200)
-    .clearCookie("accessToken", options)
-    .clearCookie("refreshToken", options)
-    .json({
-      message: "User logged out successfully",
-    });
+    return res
+      .status(200)
+      .clearCookie("accessToken", options)
+      .clearCookie("refreshToken", options)
+      .json({
+        message: "User logged out successfully",
+      });
+  } catch (error) {
+    return res.status(500).json({ message: "An error occurred" });
+  }
 });
 
 // LEAVE APPLICATION
-app.post("/apply-leave", verifyJWT, upload.single("file"), async (req, res) => {
+app.post("/apply-leave", upload.single("file"), async (req, res) => {
   const { reason, startDateStr, endDateStr } = req.body;
 
   // console.log("Reason:", reason);
@@ -295,7 +311,7 @@ app.post("/apply-leave", verifyJWT, upload.single("file"), async (req, res) => {
   }
 });
 
-app.get("/fetch-leaves", verifyJWT, async (req, res) => {
+app.get("/fetch-leaves", async (req, res) => {
   try {
     const leaves = await Leave.find().populate("student").exec();
     // console.log(leaves);
@@ -350,26 +366,24 @@ let heartRateArray = [];
 let fitData;
 
 app.get("/steps", async (req, res) => {
-  const { code } = req.query; // Read code from query parameters
-  console.log("Authorization code: ", code);
+  const { code } = req.query;
+  console.log("Authorization code:", code);
 
   const oauth2Client = new google.auth.OAuth2(
     process.env.CLIENT_ID,
     process.env.CLIENT_SECRET,
-    "http://localhost:8000/steps"
+    "http://localhost:8000/steps" // This should match your OAuth redirect URI
   );
 
   try {
     const { tokens } = await oauth2Client.getToken(code);
-    console.log(tokens);
+    console.log("Tokens:", tokens);
     oauth2Client.setCredentials(tokens);
 
-    // Define time range
     const now = new Date();
-    const sevenDaysAgo = new Date();
+    const sevenDaysAgo = new Date(now);
     sevenDaysAgo.setDate(now.getDate() - 7);
 
-    // Convert time range to milliseconds
     const sevenDaysAgoMillis = sevenDaysAgo.getTime();
     const nowMillis = now.getTime();
 
@@ -415,9 +429,9 @@ app.get("/steps", async (req, res) => {
         for (const values of points.point) {
           if (values.dataTypeName === "com.google.step_count.delta") {
             stepsArrayNew.push(values);
-          } else if (values.dataTypeName === "com.google.activity.summary") {
+          } else if (values.dataTypeName === "com.google.activity.segment") {
             workoutArray.push(values);
-          } else if (values.dataTypeName === "com.google.heart_rate.summary") {
+          } else if (values.dataTypeName === "com.google.heart_rate.bpm") {
             heartRateArray.push(values);
           }
         }
@@ -542,13 +556,13 @@ app.get("/download-entries", async (req, res) => {
 // Schedule the task to run every 7 days
 // cron.schedule('0 0 * * 0', exportEntriesToExcel); // Runs every Sunday at midnight
 
-app.post("/hostel-entry", verifyJWT, async (req, res) => {
-  const { studentEmail } = req.body;
-  if (!studentEmail) {
+app.post("/hostel-entry", async (req, res) => {
+  const { email } = req.body;
+  if (!email) {
     return res.status(400).send("Student email is required");
   }
   try {
-    const student = await Student.findOne({ email: studentEmail });
+    const student = await Student.findOne({ email });
     if (!student) {
       return res.status(404).send("Student not found");
     }
@@ -579,12 +593,10 @@ app.post("/hostel-entry", verifyJWT, async (req, res) => {
     return res.status(500).json({ message: "Failed to make new entry", error });
   }
 });
-app.get("/get-entries", verifyJWT, async (req, res) => {
+app.get("/get-entries", async (req, res) => {
   try {
     const entries = await Entry.find().populate("student").exec();
-    return res
-      .status(200)
-      .json({ message: "Entries fetched successfully", entries });
+    return res.status(200).json(entries);
   } catch (error) {
     res.status(500).json({ message: "Error while fetching entries", error });
   }
@@ -891,45 +903,64 @@ const mockStudents = {
   },
 };
 
-// trying to fetch the mobile number
-app.get("/api/v1/students/:email/mobile", async (req, res) => {
+// temporarily added
+app.post("/students", async (req, res) => {
+  const { email, fullName, password, wardNo, roomNo, mobNo } = req.body;
+  try {
+    const student = new Student({
+      email,
+      fullName,
+      password,
+      wardNo,
+      roomNo,
+      mobNo,
+    });
+    await student.save();
+    res.status(201).json({ message: "Student created successfully", student });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Failed to create student", error: error.message });
+  }
+});
+
+// trying to fetch the LOCATION
+app.get("/students/:email/location", async (req, res) => {
   try {
     const { email } = req.params;
     const student = await Student.findOne({ email });
     if (!student) {
       return res.status(404).json({ message: "Student not found" });
     }
-    res.status(200).json({ mobNo: student.mobNo });
+    res.status(200).json({ location: student.location });
   } catch (error) {
     res.status(500).json({
-      message: "Failed to fetch student mobile number",
+      message: "Failed to fetch student location",
       error: error.message,
     });
   }
 });
 
 // to send location alert
-app.post("/send-location-alert", async (req, res) => {
+app.post("/set-location-alert", async (req, res) => {
   const { email, location } = req.body;
-
   try {
-    // console.log(location);
-    // mobile number
     const student = await Student.findOne({ email });
     if (!student) {
       return res.status(404).json({ message: "Student not found" });
     }
-    // console.log(student);
 
-    const message = `Student with email ${email} is at location: \n(${location.latitude}, ${location.longitude})`;
+    student.location = location;
+    await student.save();
 
-    // location alert
+    const message = `Student with email ${email} is at location: (${location.latitude}, ${location.longitude})`;
+
     const msg = await client.messages.create({
       from: process.env.TWILIO_PHONE_NUMBER,
       to: "+919082176297",
       body: message,
     });
-
+    console.log(msg);
     return res
       .status(200)
       .json({ message: "Location alert sent successfully!", msg });
@@ -937,6 +968,29 @@ app.post("/send-location-alert", async (req, res) => {
     res
       .status(500)
       .json({ message: "Failed to send location alert", error: error.message });
+  }
+});
+
+cron.schedule("0 * * * *", async () => {
+  console.log("Running a job every minute to send location alerts");
+
+  try {
+    const students = await Student.find();
+    for (const student of students) {
+      if (student.location || student.mobNo) {
+        const message = `Periodic alert: Student with email ${student.email} is at location: )`;
+
+        // await client.messages.create({
+        //   from: process.env.TWILIO_PHONE_NUMBER,
+        //   to: "+919082176297", // You might want to replace this with `student.mobNo` or handle dynamically
+        //   body: message,
+        // });
+
+        console.log(`Sent location alert to ${student.email}`);
+      }
+    }
+  } catch (error) {
+    console.error("Error in cron job:", error);
   }
 });
 
