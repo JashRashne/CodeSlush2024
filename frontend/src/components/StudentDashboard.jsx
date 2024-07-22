@@ -1,10 +1,14 @@
 import React, { useState } from "react";
-import React, { useState } from "react";
 import RoomOccupancy from "./RoomOccupancy";
 import ActivitySummary from "./ActivitySummary";
 import AvatarCanvas from "./Avatar/AvatarCanvas";
 import setting from "../assets/setting.png";
 import add from "../assets/add.png";
+import leave from "../assets/leave.png";
+import stress from "../assets/stress.png";
+import room from "../assets/room.png";
+import sick from "../assets/sick.png";
+import community from "../assets/community.png";
 import logout from "../assets/logout.png";
 import { easeIn, easeInOut, easeOut, motion } from "framer-motion";
 import MedicineDisplay from "./MedicineDisplay";
@@ -15,13 +19,15 @@ import Alert from "./Alert";
 import LeaveApplication from "./LeaveApplication";
 import Navbar from "./Navbar";
 import HelpAsk from "./HelpAsk";
+import CommunityChat from "./Community";
 const StudentDashboard = () => {
   const [isSetMedicinesOpen, setIsSetMedicinesOpen] = useState(false);
   const [isIsoAlertOpen, setIsIsoAlertOpen] = useState(false);
   const [isLeaveApplicationOpen, setIsLeaveApplicationOpen] = useState(false);
-  const [isRoomEntryOpening, setIsRoomEntryOpening] = useState(false);
+  const [isCommunityOpen, setIsCommunityOpen] = useState(false);
   const [isStressSOSOpen, setIsStressSOSOpen] = useState(false);
   const [isRoomOccupancyOpen, setIsRoomOccupancyOpen] = useState(false);
+  const [isWeeklyReportOpen, setIsWeeklyReportOpen] = useState(false);
 
   const { register, handleSubmit } = useForm();
 
@@ -29,17 +35,38 @@ const StudentDashboard = () => {
     <>
       {/* bg-gradient-to-tr from-white to-[#70d7bb97] */}{" "}
       <div className=" h-[100vh] w-[100%] flex flex-col items-center justify-center relative ">
+        {isWeeklyReportOpen && (
+          <>
+            {/* Overlay */}
+            <div className="fixed inset-0 bg-black opacity-50 z-[50]" />
+
+            {/* Motion Alert */}
+            <motion.div
+              initial={{ opacity: 0, y: -500, scale: 0 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              // exit={{ opacity: 0, y: 0, scale: 0 }}
+              transition={{ duration: 0.8, ease: easeInOut }}
+              className="absolute bg-[#FFFFDD] p-6 rounded-[1.8rem] shadow-2xl w-[90%] h-[90%] z-[100] flex items-center justify-center"
+            >
+              <ActivitySummary setIsWeeklyReportOpen={setIsWeeklyReportOpen} />
+            </motion.div>
+          </>
+        )}{" "}
         {isSetMedicinesOpen && (
           <>
-            <div className="fixed inset-0 bg-black opacity-50 z-[50]" />{" "}
+            <div className="fixed inset-0 bg-black opacity-50 z-[50]" />
             <motion.div
-              initial={{ opacity: 0, scale: 0 }}
+              initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
-              // exit={{ opacity: 0, y: 0, scale: 0 }}
-              transition={{ delay: 0.1, ease: easeInOut }}
-              className="absolute bg-white dark:bg-purple-200 p-6 rounded-[1.8rem] shadow-2xl h-[70vh] w-[60vw] z-[100] "
+              exit={{ opacity: 0, scale: 0.8 }}
+              transition={{ delay: 0.1, ease: "easeInOut" }}
+              className="fixed inset-0 flex items-center justify-center z-[100]"
             >
-              <MedicineTracker setIsSetMedicinesOpen={setIsSetMedicinesOpen} />
+              <div className="bg-white rounded-lg shadow-2xl max-w-lg w-full   h-[85%]">
+                <MedicineTracker
+                  setIsSetMedicinesOpen={setIsSetMedicinesOpen}
+                />
+              </div>
             </motion.div>
           </>
         )}{" "}
@@ -82,7 +109,7 @@ const StudentDashboard = () => {
             </motion.div>
           </>
         )}{" "}
-        {isRoomEntryOpening && (
+        {isCommunityOpen && (
           <>
             {/* Overlay */}
             <div className="fixed inset-0 bg-black opacity-50 z-[50]" />
@@ -93,10 +120,9 @@ const StudentDashboard = () => {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               // exit={{ opacity: 0, y: 0, scale: 0 }}
               transition={{ duration: 0.8, ease: easeInOut }}
-              className="absolute bg-[#FFFFDD] p-6 rounded-[1.8rem] shadow-2xl z-[100] flex items-center justify-center"
+              className="absolute bg-[#92ace3] p-2 rounded-[1.8rem] shadow-2xl z-[100] w-[97.5%] h-[97.5%] flex items-center justify-center"
             >
-              <Alert setIsIsoAlertOpen={setIsIsoAlertOpen} />
-              {/* <MedicineTracker setIsSetMedicinesOpen={setIsSetMedicinesOpen} /> */}
+              <CommunityChat setIsCommunityOpen={setIsCommunityOpen} />
             </motion.div>
           </>
         )}{" "}
@@ -138,26 +164,33 @@ const StudentDashboard = () => {
             </motion.div>
           </>
         )}{" "}
-        <div className="h-[10%] w-[100%] border-b-2 bg-gradient-to-tr from-[#d7fef5] to-white">
+        <div className="h-[10%] w-[100%] border-b-2">
           <Navbar />
         </div>
-        <div className="h-[90%] w-[100%]">
+        <div className="h-[90%] bg-gradient-to-t from-[#e1f7f2] to-white">
           <div className="h-[100%] w-[100%] flex p-[2rem] items-center justify-center gap-[1rem]">
             <div className="h-[100%] w-[72.5%] flex flex-col items-center justify-center gap-[1rem]">
-              <div className="bg-[#016A70] w-[100%] text-white flex items-center justify-center h-[65%]">
+              <div className="bg-[#26585b] w-[100%] text-white flex items-center justify-center h-[65%] rounded-md">
                 <div className="h-[100%] w-[60%] flex flex-col items-center justify-center">
                   <div className="w-[100%] h-[60%] py-3 px-7">
-                    <h1 className="text-[4.2rem]">WELCOME JUHI</h1>
+                    <h1 className="text-[4em] font-semibold">WELCOME JUHI</h1>
                     <p className="text-[1.6rem]">
                       Hope you are having a great day !
                     </p>
                   </div>
                   <div className="w-[100%] h-[40%] flex  justify-center">
-                    <div className="tracker bg-[#FFFFDD] w-[90%] h-[80%] p-2 rounded-[1.8rem] flex "></div>
+                    <div
+                      onClick={() => {
+                        setIsWeeklyReportOpen(!isWeeklyReportOpen);
+                      }}
+                      className="report cursor-pointer bg-[#e4f1ee] border-2 w-[90%] h-[80%] p-2 rounded-[1.8rem] flex "
+                    >
+                      sdsds
+                    </div>
                   </div>
                 </div>
                 <div className="h-[100%] w-[42%] flex items-center justify-center">
-                  <div className="avatar bg-[#FFFFDD] h-[80%] w-[87%] rounded-[1.8rem]  overflow-hidden">
+                  <div className="avatar bg-[#ece9e9] border-[#b1cab4] border-4 h-[80%] w-[87%] rounded-[1.8rem]  overflow-hidden">
                     <AvatarCanvas />
                   </div>
                 </div>
@@ -172,9 +205,12 @@ const StudentDashboard = () => {
                     onClick={() => {
                       setIsIsoAlertOpen(!isIsoAlertOpen);
                     }}
-                    className="bg-[#ADE792] cursor-pointer shadow-2xl w-[100%] h-[70%] rounded-xl"
+                    className="bg-[#a7d8cd] flex justify-end p-2 cursor-pointer shadow-2xl shadow-[#567d78] relative w-[100%] h-[80%] rounded-xl"
                   >
-                    Sick Shield
+                    <h1 className="absolute top-2 left-2 w-[20%] pl-2 text-xl font-medium">
+                      Sick Shield
+                    </h1>
+                    <img src={sick} alt="sick" className="w-[10rem] " />
                   </motion.div>
                 </div>
                 <div className=" h-[100%] w-[23%] flex items-center justify-center">
@@ -185,9 +221,16 @@ const StudentDashboard = () => {
                     onClick={() => {
                       setIsLeaveApplicationOpen(!isLeaveApplicationOpen);
                     }}
-                    className="bg-[#ADE792] cursor-pointer shadow-2xl w-[100%] h-[70%] rounded-xl"
+                    className=" border-[0.4rem] flex relative justify-end items-center p-2 border-[#a7d8cd] cursor-pointer shadow-2xl shadow-[#567d78]  w-[100%] h-[80%] rounded-xl"
                   >
-                    Leave Lever
+                    <h1 className="absolute top-2 left-2 w-[20%] pl-2 text-xl font-medium">
+                      Leave Lever
+                    </h1>
+                    <img
+                      src={leave}
+                      alt="leave"
+                      className="w-[14rem] h-[9rem] -mr-8"
+                    />
                   </motion.div>
                 </div>
                 <div className=" h-[100%] w-[23%] flex items-center justify-center">
@@ -196,11 +239,18 @@ const StudentDashboard = () => {
                     whileHover={{ scale: 1.05 }}
                     transition={{ ease: easeInOut }}
                     onClick={() => {
-                      setIsRoomEntryOpening(!isRoomEntryOpening);
+                      setIsCommunityOpen(!isCommunityOpen);
                     }}
-                    className="bg-[#ADE792] cursor-pointer shadow-2xl w-[100%] h-[70%] rounded-xl"
+                    className="bg-[#a7d8cd] flex justify-end p-2 cursor-pointer shadow-2xl shadow-[#567d78]  relative w-[100%] h-[80%] rounded-xl"
                   >
-                    Room Radar
+                    <h1 className="absolute top-2 left-2 w-[20%] pl-2 text-xl font-medium">
+                      Chit-Chat Chalet
+                    </h1>
+                    <img
+                      src={community}
+                      alt="coomunity"
+                      className="w-[7rem] "
+                    />
                   </motion.div>
                 </div>
                 <div className=" h-[100%] w-[23%] flex items-center justify-center">
@@ -211,44 +261,53 @@ const StudentDashboard = () => {
                     onClick={() => {
                       setIsStressSOSOpen(!isStressSOSOpen);
                     }}
-                    className="bg-[#ADE792] cursor-pointer shadow-2xl w-[100%] h-[70%] rounded-xl"
+                    className=" border-[0.4rem] flex relative justify-end items-center p-2 border-[#a7d8cd] cursor-pointer shadow-2xl shadow-[#567d78]  w-[100%] h-[80%] rounded-xl"
                   >
-                    Stress SOS
+                    <h1 className="absolute top-2 left-2 w-[20%] pl-2 text-xl font-medium">
+                      Stress SOS
+                    </h1>
+                    <img src={stress} alt="stress" className="w-[9rem] -mr-4" />
                   </motion.div>
                 </div>
               </div>
             </div>
             <div className="h-[100%] w-[27.5%] flex flex-col items-center justify-center gap-[1rem]">
               <div className="w-[100%] h-[45%] flex flex-col items-center justify-center gap-[1rem]">
-                <div className="bg-[#b9e6d4] relative drop-shadow-md p-2 tracker w-[100%] rounded-tr-[1.8rem] h-[50%] flex flex-col">
+                <div className="bg-[#74c9b7] relative drop-shadow-md p-2 tracker w-[100%] rounded-md h-[50%] flex">
                   {/* bg-[#91cd6c]        {" "} */}
                   {/* bg-[#88caaf] */}
-                  <div className="w-[100%]">
+                  <div className="overflow-auto scrollbar-hide w-[90%] ">
+                    {" "}
+                    <MedicineDisplay />
+                  </div>
+                  <div className="w-[15%] flex items-center justify-center">
                     <div
                       onClick={() => setIsSetMedicinesOpen(!isSetMedicinesOpen)}
-                      className="float-right text-center flex items-center justify-center text-xl cursor-pointer pr-2"
+                      className=" text-center flex items-center justify-center text-xl cursor-pointer pr-2"
                     >
                       <img src={add} alt="add" className="w-[2rem] " />
                     </div>
-                  </div>
-                  <div className="overflow-auto scrollbar-hide w-[95%] ">
-                    {" "}
-                    <MedicineDisplay />
                   </div>
                 </div>
                 <div
                   onClick={() => {
                     setIsRoomOccupancyOpen(!isRoomOccupancyOpen);
                   }}
-                  className="bg-[#b9e6d4] cursor-pointer drop-shadow-md w-[100%] rounded-tr-[1.8rem] h-[50%] p-2"
+                  className="bg-[#74c9b7] cursor-pointer flex items-center justify-center drop-shadow-md gap-1 w-[100%] rounded-md h-[50%] p-2"
                 >
-                  ROOM OCCUPANCY
+                  {" "}
+                  <div className="w-[40%]">
+                    <img src={room} alt="room" className=" " />
+                  </div>
+                  <h1 className="text-[1.8rem] font-semibold w-[55%]">
+                    ROOM OCCUPANCY
+                  </h1>
                 </div>
               </div>
               <div className="w-[100%] h-[55%] relative">
-                <div className="w-[95%] h-[95%] bg-[#11493f] absolute top-0 left-0 border-2 shadow-2xl"></div>
-                <div className="w-[95%] h-[95%] bg-[#65b997] border-2 border-[#11493f] absolute bottom-0 right-0  shadow-2xl overflow-hidden pb-[3.7rem] ">
-                  <h1 className="bg-white h-[20%] text-2xl p-2 text-center">
+                <div className="w-[95%] h-[95%] bg-[#26585b] absolute top-0 left-0 border-2 shadow-2xl rounded-md"></div>
+                <div className="w-[95%] h-[95%] rounded-md bg-white font-medium border-2 border-[#016A70] absolute bottom-0 right-0  shadow-2xl overflow-hidden pb-[3.7rem] ">
+                  <h1 className="bg-gray-200 h-[30%] text-[1.8rem] p-2 text-center flex justify-center items-center">
                     Medical History
                   </h1>
 
@@ -399,7 +458,7 @@ const StudentDashboard = () => {
               whileHover={{ scale: 1.05 }}
               transition={{ ease: easeInOut }}
               onClick={() => {
-                setIsRoomEntryOpening(!isRoomEntryOpening);
+                setIsCommunityOpen(!isCommunityOpen);
               }}
               className="row-2-elements w-[20%] h-[100%] rounded-md bg-purple-500 flex items-center justify-center "
             >
