@@ -85,7 +85,7 @@ const LeaveApplication = ({ setIsLeaveApplicationOpen }) => {
             <div className="h-[20%] flex items-center justify-start ml-[4%]">
               <input
                 {...register('reason', { required: "Reason is required" })}
-                className="h-[58%] rounded-[8px] pl-[10px] w-[35%] border border-[#b1b3b1] border-[1px]"
+                className="h-[58%] rounded-[8px] pl-[10px] w-[35%] border border-[#b1b3b1] "
                 type="text"
                 placeholder="Enter Reason"
               />
@@ -94,7 +94,7 @@ const LeaveApplication = ({ setIsLeaveApplicationOpen }) => {
             <div className="h-[20%] flex items-center justify-start ml-[4%]">
               <input
                 {...register('startDate', { required: "Start date is required" })}
-                className="h-[58%] rounded-[8px] px-[10px] w-[35%] border border-[#b1b3b1] border-[1px]"
+                className="h-[58%] rounded-[8px] px-[10px] w-[35%] border border-[#b1b3b1] "
                 type="date"
               />
               {errors.startDate && <p className="text-red-500 text-xs">{errors.startDate.message}</p>}
@@ -102,7 +102,7 @@ const LeaveApplication = ({ setIsLeaveApplicationOpen }) => {
             <div className="h-[20%] flex items-center justify-start ml-[4%]">
               <input
                 {...register('endDate', { required: "End date is required" })}
-                className="h-[58%] rounded-[8px] px-[10px] w-[35%] border border-[#b1b3b1] border-[1px]"
+                className="h-[58%] rounded-[8px] px-[10px] w-[35%] border border-[#b1b3b1] "
                 type="date"
               />
               {errors.endDate && <p className="text-red-500 text-xs">{errors.endDate.message}</p>}
