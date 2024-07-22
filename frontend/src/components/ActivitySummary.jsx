@@ -311,3 +311,4 @@ const ActivitySummary = ({ setIsWeeklyReportOpen }) => {
 };
 
 export default ActivitySummary;
+
