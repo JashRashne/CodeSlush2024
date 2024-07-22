@@ -26,6 +26,8 @@ const LeaveReview = () => {
           <h1>{leave.student.fullName}</h1>
         </div>
       ))}
+
+      {/* Implement Accept and Reject */}
     </>
   );
 };

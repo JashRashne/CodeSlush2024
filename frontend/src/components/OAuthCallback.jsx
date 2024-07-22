@@ -1,6 +1,6 @@
-import React, { useEffect } from 'react';
-import axios from 'axios';
-import { useLocation, useNavigate } from 'react-router-dom';
+import React, { useEffect } from "react";
+import axios from "axios";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const OAuthCallback = () => {
   const location = useLocation();
@@ -8,21 +8,25 @@ const OAuthCallback = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      // Parse the query parameters from the URL
       const queryParams = new URLSearchParams(location.search);
-      const code = queryParams.get('code');
+      const code = queryParams.get("code");
       console.log("Authorization Code:", code);
 
       if (code) {
         try {
-          // Send the authorization code to your backend
-          const response = await axios.get(`http://localhost:8000/steps?code=${code}` );
+          const response = await axios.get(
+            `http://localhost:8000/steps?code=${code}`
+          );
           console.log(response.data);
-          // Redirect to the desired page after processing
-          navigate('/');
+          navigate("/");
         } catch (error) {
-          console.error('Error fetching data:', error);
+          console.error("Error fetching data:", error);
+          alert(
+            "Error fetching data. Please check the console for more details."
+          );
         }
+      } else {
+        alert("Authorization code is missing.");
       }
     };
 

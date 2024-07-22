@@ -1,8 +1,8 @@
 import axios from "axios";
 import React from "react";
 import { useForm } from "react-hook-form";
-
-const MedicineTracker = () => {
+import close from "../assets/close.png";
+const MedicineTracker = ({ setIsSetMedicinesOpen }) => {
   const { register, handleSubmit } = useForm();
 
   const onSubmit = async (data) => {
@@ -30,79 +30,78 @@ const MedicineTracker = () => {
   };
 
   return (
-    <div className="max-w-md mx-auto mt-10 p-6 bg-white shadow-md rounded-md">
+    <div className="bg-red-200 w-[100%] h-[100%]">
+      <div className="w-[100%] ">
+        <img
+          src={close}
+          alt="close"
+          onClick={() => setIsSetMedicinesOpen((prev) => !prev)}
+          className="w-[1.8rem] cursor-pointer float-right"
+        />
+      </div>
+
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <div>
-          <label
-            htmlFor="medName"
-            className="block text-sm font-medium text-gray-700"
-          >
-            Med Name
-          </label>
-          <input
-            type="text"
-            id="medName"
-            {...register("medName")}
-            className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
-          />
+        <div className="grid grid-cols-2 items-center">
+          <div>
+            <label
+              htmlFor="medName"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Med Name
+            </label>
+            <input
+              type="text"
+              id="medName"
+              {...register("medName")}
+              className="block w-full p-2 border border-gray-300 rounded-md"
+            />
+          </div>{" "}
+          <div>
+            <label
+              htmlFor="startDate"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Start Date
+            </label>
+            <input
+              type="date"
+              id="startDate"
+              {...register("startDate")}
+              className=" block w-full p-2 border border-gray-300 rounded-md"
+            />
+          </div>
         </div>
-        <div>
-          <label
-            htmlFor="startDate"
-            className="block text-sm font-medium text-gray-700"
-          >
-            Start Date
-          </label>
-          <input
-            type="date"
-            id="startDate"
-            {...register("startDate")}
-            className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
-          />
-        </div>
-        <div>
-          <label
-            htmlFor="dosage1"
-            className="block text-sm font-medium text-gray-700"
-          >
-            Dosage Part 1
-          </label>
-          <input
-            type="number"
-            id="dosage1"
-            {...register("dosage1")}
-            className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
-          />
-        </div>
-
-        <div>
-          <label
-            htmlFor="dosage2"
-            className="block text-sm font-medium text-gray-700"
-          >
-            Dosage Part 2
-          </label>
-          <input
-            type="number"
-            id="dosage2"
-            {...register("dosage2")}
-            className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
-          />
-        </div>
-
-        <div>
-          <label
-            htmlFor="dosage3"
-            className="block text-sm font-medium text-gray-700"
-          >
-            Dosage Part 3
-          </label>
-          <input
-            type="number"
-            id="dosage3"
-            {...register("dosage3")}
-            className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
-          />
+        <label
+          htmlFor="dosage1"
+          className="block text-sm font-medium text-gray-700"
+        >
+          Dosage Part 1
+        </label>
+        <div className="grid grid-cols-3 items-center ">
+          <div>
+            <input
+              type="number"
+              id="dosage1"
+              {...register("dosage1")}
+              className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+            />
+          </div>{" "}
+          <div>
+            <input
+              type="number"
+              id="dosage2"
+              {...register("dosage2")}
+              className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+            />
+          </div>{" "}
+          <div>
+            <input
+              type="number"
+              id="dosage3"
+              {...register("dosage3")}
+              className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+            />
+          </div>
         </div>
 
         <div>

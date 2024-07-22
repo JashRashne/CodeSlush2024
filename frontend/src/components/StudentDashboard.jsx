@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import React, { useState } from "react";
 import RoomOccupancy from "./RoomOccupancy";
 import ActivitySummary from "./ActivitySummary";
 import AvatarCanvas from "./Avatar/AvatarCanvas";
@@ -171,7 +172,7 @@ const StudentDashboard = () => {
                     onClick={() => {
                       setIsIsoAlertOpen(!isIsoAlertOpen);
                     }}
-                    className="bg-[#ADE792] shadow-2xl w-[100%] h-[70%] rounded-xl"
+                    className="bg-[#ADE792] cursor-pointer shadow-2xl w-[100%] h-[70%] rounded-xl"
                   >
                     Sick Shield
                   </motion.div>
@@ -184,7 +185,7 @@ const StudentDashboard = () => {
                     onClick={() => {
                       setIsLeaveApplicationOpen(!isLeaveApplicationOpen);
                     }}
-                    className="bg-[#ADE792] shadow-2xl w-[100%] h-[70%] rounded-xl"
+                    className="bg-[#ADE792] cursor-pointer shadow-2xl w-[100%] h-[70%] rounded-xl"
                   >
                     Leave Lever
                   </motion.div>
@@ -197,7 +198,7 @@ const StudentDashboard = () => {
                     onClick={() => {
                       setIsRoomEntryOpening(!isRoomEntryOpening);
                     }}
-                    className="bg-[#ADE792] shadow-2xl w-[100%] h-[70%] rounded-xl"
+                    className="bg-[#ADE792] cursor-pointer shadow-2xl w-[100%] h-[70%] rounded-xl"
                   >
                     Room Radar
                   </motion.div>
@@ -210,7 +211,7 @@ const StudentDashboard = () => {
                     onClick={() => {
                       setIsStressSOSOpen(!isStressSOSOpen);
                     }}
-                    className="bg-[#ADE792] shadow-2xl w-[100%] h-[70%] rounded-xl"
+                    className="bg-[#ADE792] cursor-pointer shadow-2xl w-[100%] h-[70%] rounded-xl"
                   >
                     Stress SOS
                   </motion.div>
@@ -239,7 +240,7 @@ const StudentDashboard = () => {
                   onClick={() => {
                     setIsRoomOccupancyOpen(!isRoomOccupancyOpen);
                   }}
-                  className="bg-[#b9e6d4] drop-shadow-md w-[100%] rounded-tr-[1.8rem] h-[50%] p-2"
+                  className="bg-[#b9e6d4] cursor-pointer drop-shadow-md w-[100%] rounded-tr-[1.8rem] h-[50%] p-2"
                 >
                   ROOM OCCUPANCY
                 </div>

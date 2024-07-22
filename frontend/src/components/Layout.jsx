@@ -1,25 +1,14 @@
-import React from 'react'
-import Sidebar from './Sidebar'
-import Navbar from './Navbar'
-
-const Layout = ({children}) => {
+import React from "react";
+const Layout = ({ children }) => {
   return (
     <>
-        <div className='h-[100vh] w-full bg-blue-200 flex flex-col overflow-auto'>
-            <div className='w-full h-[12%] bg-red-300'>
-                <Navbar />
-            </div>
-            <div className='w-full h-[88%] flex bg-yellow-300'>
-                <div className='w-[17%] bg-blue-300'>
-                    <Sidebar />
-                </div>
-                <div className='w-[83%]'>
-                    {children}
-                </div>
-            </div>
-        </div>
-    </>
-  )
-}
+      <div className="bg-red-200 h-[100vh] w-[100%] relative">
+        <div className="h-[10%] border-b-2">THIS IS NAVBAR</div>
 
-export default Layout
+        <div className="h-[90%] w-[100%]">{children}</div>
+      </div>{" "}
+    </>
+  );
+};
+
+export default Layout;
