@@ -40,8 +40,8 @@ function App() {
           {/* <CamSurveillance /> */}
           {/* <PatientInfo /> */}
           {/* <SecurityCheckIn /> */}
-          {/* <WardenDashboard/> */}
           <StudentDashboard/>
+          {/* <StudentDashboard/> */}
           {/* <HelpAsk /> */}
         </Layout>
       </Router>

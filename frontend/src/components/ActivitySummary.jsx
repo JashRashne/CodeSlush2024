@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { easeIn, easeInOut, motion } from "framer-motion";
 import { Line } from "react-chartjs-2";
+import close from "../assets/close.png";
+
 import {
   Chart as ChartJS,
   LineElement,
@@ -78,7 +80,7 @@ const heartRateArray = testArray.map((obj) => obj.heartRate);
 const workoutMinsArray = testArray.map((obj) => obj.workoutMins);
 const dateArray = testArray.map((obj) => obj.date);
 
-const ActivitySummary = () => {
+const ActivitySummary = ({ setIsWeeklyReportOpen }) => {
   const [selectedActivity, setSelectedActivity] = useState("steps");
   const [dataset, setDataset] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -192,6 +194,15 @@ const ActivitySummary = () => {
 
   return (
     <div className="w-[100%] h-full flex">
+      {" "}
+      <div
+        onClick={() => {
+          setIsWeeklyReportOpen(false);
+        }}
+        className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 w-7 h-7 cursor-pointer flex items-center justify-center"
+      >
+        <img src={close} alt="close" />
+      </div>
       {/* <div className="h-full w-[100%] rounded-[1.8rem] flex flex-col p-2"> */}
       <div className="w-[80%] h-[100%] ">
         <Line data={data} options={options} />
@@ -231,7 +242,6 @@ const ActivitySummary = () => {
           Summary
         </button>
       </div>
-
       {/* <div className="h-full w-[30%] bg-red-200 flex flex-col">
         <div className="h-[10%] w-full bg-blue-200 flex items-center justify-center">
           Activity Log
@@ -272,7 +282,6 @@ const ActivitySummary = () => {
           })}
         </div>
       </div> */}
-
       {isModalOpen ? (
         <motion.div
           initial={{ opacity: 0 }}
